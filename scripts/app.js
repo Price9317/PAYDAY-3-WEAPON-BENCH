@@ -14,9 +14,7 @@ function shotsToKill(
     critMultiplier,
     effectiveArmorPenetration,
     enemyHealth,
-    enemyArmor,
-	enemyName
-) {
+    enemyArmor) {
     if (critMultiplier < 1){ critMultiplier = 1;}
 
     const critDamage = damage * critMultiplier,
@@ -166,6 +164,22 @@ function timeToKill(
     magSize,
     reloadTime
 ) {
+    select = document.getElementById("Magazine-selector");
+    Magtype = select.selectedIndex;
+    //console.log(select[Magtype].value)
+    //console.log(reloadTime)
+    switch(select[Magtype].value){
+        case "快拔":
+            reloadTime = reloadTime * 0.85;
+            break;
+        case "紧凑":
+            reloadTime = reloadTime * 0.95;
+            break;
+        case "扩容":
+            reloadTime = reloadTime * 1.1;
+            break;
+    }
+    //console.log(reloadTime)
     if (!roundsPerMinute) roundsPerMinute = 600;
     if (!pelletCount) pelletCount = 1;
     else shotsToKill = Math.ceil(shotsToKill / pelletCount);
@@ -176,6 +190,8 @@ function timeToKill(
 
     return Math.round(TTK * 100) / 100;
 }
+
+
 
 function initialiseWeaponData() {
     // Create a list of weapons organised by their class
@@ -191,7 +207,8 @@ function initialiseWeaponData() {
     for (const weaponClass in weaponList) {
         const weaponSelectorGroup = weaponSelector.appendChild(document.createElement('optgroup'));
         weaponSelectorGroup.setAttribute('label', weaponClass);
-
+		
+        
         weaponList[weaponClass].forEach((weapon) => {
             const weaponSelectorOption = weaponSelector.appendChild(document.createElement('option'));
             weaponSelectorOption.setAttribute('value', weapon);
@@ -228,16 +245,20 @@ function initialiseWeaponData() {
             '需要锋锐。<br/>' + skills[skill].description :
             skills[skill].description;
     });
+	
 }
 
 function updateDamageData(
     selectedWeapon,
-    selectedSkills
+    selectedSkills,
+    
 ) {
+
     const damageChart = document.querySelector('#damage-data');
-
+    
     damageChart.textContent = '';
-
+    var MagSizenum = document.getElementById("weapon-mag-size-stat").innerText;
+    //console.log(MagSizenum)
     let currentCard = 0;
 
     for (const enemyName in enemyData) {
@@ -300,7 +321,7 @@ function updateDamageData(
                         shotsToBreakVisor,
                         weaponData[selectedWeapon].RoundsPerMinute,
                         weaponData[selectedWeapon].ProjectilesPerFiredRound,
-                        weaponData[selectedWeapon].AmmoLoaded ?? 10,
+                        MagSizenum,
                         weaponData[selectedWeapon].ReloadEmptyNotifyTime
                     );
 
@@ -309,7 +330,7 @@ function updateDamageData(
                     shotsToBreakVisor = Math.ceil(shotsToBreakVisor / weaponData[selectedWeapon].ProjectilesPerFiredRound);
                 }
 
-                const reloadCount = Math.floor((shotsToBreakVisor - 1) / (weaponData[selectedWeapon].AmmoLoaded ?? 10));
+                const reloadCount = Math.floor((shotsToBreakVisor - 1) / (MagSizenum));
                if (enemyName == '盾牌特警') {
                     visorDisplay.textContent = `${distance}米内的${shotsToBreakVisor}次射击方可打破观察窗`;
                 }
@@ -380,7 +401,7 @@ function updateDamageData(
                       shotsAtDistances[distance].totalShots,
                       weaponData[selectedWeapon].RoundsPerMinute,
                       weaponData[selectedWeapon].ProjectilesPerFiredRound,
-                      weaponData[selectedWeapon].AmmoLoaded ?? 10,
+                      MagSizenum,
                       weaponData[selectedWeapon].ReloadEmptyNotifyTime
                   ),
                   armoredCrits = shotsAtDistances[distance].armoredCrits,
@@ -438,7 +459,7 @@ function updateDamageData(
             damageBracketTTK.textContent = TTK + " 秒";
             damageBracket.appendChild(damageBracketTTK);
 
-            const reloadCount = Math.floor((totalShotsToKill - 1) / (weaponData[selectedWeapon].AmmoLoaded ?? 10));
+            const reloadCount = Math.floor((totalShotsToKill - 1) / (MagSizenum));
             if (reloadCount >= 1) {
                 let damageBracketReloads = document.createElement('span');
                 damageBracketReloads.setAttribute('class', 'time-to-kill');
@@ -491,12 +512,80 @@ function updateDamageData(
     document.querySelector('#selected-weapon')
         .style.setProperty('--weapon-image', `url("images/weapons/${selectedWeapon}.jpg")`);
 }
+function updateMagsize(selectedWeapon){
+    
+    weapon = weaponData[selectedWeapon];
+    var select = document.getElementById("Magazine-selector");
+    var Magtype = select.selectedIndex;
+    
+    switch(select[Magtype].value){
+      case "默认":
+        document.querySelector('#weapon-mag-size-stat')
+          .textContent = weapon.AmmoLoaded ?? 10;
+        
+        //return MagSizenum;
+        break;
+      case "扩容":
+        document.querySelector('#weapon-mag-size-stat')
+          .textContent = weapon.EAmmoLoaded ?? 10;
+        
+        //return MagSizenum;
+        break;
+      case "紧凑":
+        document.querySelector('#weapon-mag-size-stat')
+          .textContent = weapon.CAmmoLoaded ?? 10;
+        
+        //return MagSizenum;
+        break;
+      case "快拔":
+        document.querySelector('#weapon-mag-size-stat')
+          .textContent = weapon.QAmmoLoaded ?? 10;
+        
+        //return MagSizenum;
+        break;
+    }
+    switch(weapon.name){
+        default:
+            if (weapon.AmmoPickup.Min == weapon.AmmoPickup.Max)
+            document.querySelector('#weapon-ammo-pickup-stat')
+                .textContent = weapon.AmmoPickup.Max;
+            else{
+            document.querySelector('#weapon-ammo-pickup-stat')
+                .textContent = `${weapon.AmmoPickup.Min ?? 5}-${weapon.AmmoPickup.Max ?? 10}`;
+            };
+            break;
+        case "Ziv Commando":
+        case "SG Compact-7":
+        case "FIK PC9":
+            if(select[Magtype].value == "快拔"){
+                document.querySelector('#weapon-ammo-pickup-stat')
+                .textContent = `${weapon.QAmmoPickup.Min ?? 5}-${weapon.QAmmoPickup.Max ?? 10}`;
+            }else{
+                document.querySelector('#weapon-ammo-pickup-stat')
+                .textContent = `${weapon.AmmoPickup.Min ?? 5}-${weapon.AmmoPickup.Max ?? 10}`;
+            };
+            break;
+        case "FIK 22 TLR":
+        case "FSA-12G":
+        case "WAR-45":
+        case "RG5":
+        case "ATK-7":
+            if(select[Magtype].value == "紧凑"){
+                document.querySelector('#weapon-ammo-pickup-stat')
+                .textContent = `${weapon.CAmmoPickup.Min ?? 5}-${weapon.CAmmoPickup.Max ?? 10}`;
+            }else{
+                document.querySelector('#weapon-ammo-pickup-stat')
+                .textContent = `${weapon.AmmoPickup.Min ?? 5}-${weapon.AmmoPickup.Max ?? 10}`;
+            };
+            break;
 
+    }
+}
 function updateWeaponStats(
     selectedWeapon
 ) {
     const weapon = weaponData[selectedWeapon];
-
+    
     const damageStats = document.querySelector('#weapon-damage-stats'),
           critStats = document.querySelector('#weapon-crit-stats');
 
@@ -539,17 +628,8 @@ function updateWeaponStats(
 
     document.querySelector('#weapon-ap-stat')
         .textContent = weapon.ArmorPenetration;
-
-    document.querySelector('#weapon-mag-size-stat')
-        .textContent = weapon.AmmoLoaded ?? 10;
-
-    if (weapon.AmmoPickup.Min == weapon.AmmoPickup.Max)
-        document.querySelector('#weapon-ammo-pickup-stat')
-            .textContent = weapon.AmmoPickup.Max;
-    else{
-        document.querySelector('#weapon-ammo-pickup-stat')
-            .textContent = `${weapon.AmmoPickup.Min ?? 5}-${weapon.AmmoPickup.Max ?? 10}`;
-		}
+        
+    
 }
 
 const skills = {
@@ -613,20 +693,33 @@ const edgeSkillButtons = [...skillButtons].filter(skillButton => {
 
 // Initialise the damage chart with defaults
 const weaponSelector = document.querySelector('#weapon-selector');
+const MagazineSelector = document.querySelector('#Magazine-selector');
 let selectedWeapon = weaponSelector.options[weaponSelector.selectedIndex].value,
     selectedSkills = [];
 
-updateDamageData(selectedWeapon, selectedSkills);
+
+
 updateWeaponStats(selectedWeapon);
+initialiseMagazineData(selectedWeapon);
+updateMagsize(selectedWeapon);
+updateDamageData(selectedWeapon, selectedSkills,);
 
 // Add event listeners for weapon selector and buttons to update damage chart
 
 weaponSelector.addEventListener("change", (event) => {
     selectedWeapon = event.target.options[event.target.selectedIndex].value;
-    updateDamageData(selectedWeapon, selectedSkills);
+    initialiseMagazineData(selectedWeapon);
+    updateMagsize(selectedWeapon)
+    updateDamageData(selectedWeapon, selectedSkills,);
     updateWeaponStats(selectedWeapon);
-});
+	
+    
 
+});
+MagazineSelector.addEventListener("change", (event) => {
+    updateMagsize(selectedWeapon);
+    updateDamageData(selectedWeapon,selectedSkills,)
+});
 weaponSelector.addEventListener("submit", (event) => {
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -665,6 +758,6 @@ for (const button of skillButtons) {
             .map(i => i = i.value);
         selectedSkills = pressedButtons;
 
-        updateDamageData(selectedWeapon, selectedSkills);
+        updateDamageData(selectedWeapon, selectedSkills,);
     });
 }
