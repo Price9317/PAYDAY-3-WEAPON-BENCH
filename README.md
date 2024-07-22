@@ -1,21 +1,5 @@
-silly little payday 3 damage calculator yippie
-
-## todo:
-- improve styling
-  - header and footer needs work ohhhhboy
-- add hover tooltips to explain skill effects and requirements
-- add hover tooltips to visually show distances
-- drag and drop enemy damage stats for easier comparison
-
-## potentially:
-- implement a more detailed stats display
-  - better organising of data
-  - better visualisation of damage and crit falloffs
-  - visualisation of weapon recoil patterns
-  - visualisation of accuracy?
-- weapon attachments
-  - mag size increases for reload speed impacted ttks
-  - long and close range barrels for damage falloffs
-  - precision shot magnification?
-  - maybe even everything if it impacts stat visualisation meaningfully who knows
-- direct compare tool
+原版地址：https://puppy-girl.github.io/payday-weapon-bench/
+由于原作者自语法错误DLC后不再更新，我们尝试着自己完善了语法错误DLC之后的武器数据
+中文版地址：https://price9317.github.io/PAYDAY3-WEAPON-BENCH-CN.io/
+收获日3 武器数据站不仅有着全部武器的详细数据，也有依据技能变化计算得出对敌人的作战数据的能力
+可以帮助各位劫匪们更好地制作新的装备配置
